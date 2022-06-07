@@ -4,7 +4,10 @@ function love.load()
     boardWidth=10
     boardHeight = 18
     shapeIndex = 1
-    shapeRotation=1
+    shapeRotation = 1
+    horizontalOffset = 0
+    verticalOffset = 0
+    fallingTime = 0
     love.graphics.setBackgroundColor(0,0,0)
     board={}
     for i=1,boardHeight do
@@ -110,25 +113,25 @@ function love.load()
         },
         {
             {
-                {' ','x',' ',' '},
-                {' ','x',' ',' '},
-                {' ','x',' ',' '},
-                {' ','x',' ',' '},
-            },
-            {
-                {' ',' ',' ',' '},
-                {'x','x','x','x'},
-                {' ',' ',' ',' '},
-                {' ',' ',' ',' '},
-            },
-        },
-        {
-            {
                 {' ',' ',' ',' '},
                 {' ','x','x',' '},
                 {' ','x','x',' '},
                 {' ',' ',' ',' '},
             }
+        },
+        {
+            {
+                {' ',' ',' ',' '},
+                {'z','z',' ',' '},  
+                {' ','z','z',' '},
+                {' ',' ',' ',' '},
+            },
+            {
+                {' ','z',' ',' '},
+                {'z','z',' ',' '},
+                {'z',' ',' ',' '},
+                {' ',' ',' ',' '},
+            },
         },
     }
 
@@ -154,7 +157,7 @@ end
 
 local function randomizeShape()
     --randomShape = math.random(1,6)
-    randomShape = 1
+    --randomShape = 1
     randomColor = math.random(1,10)
     randomColorLetter = colorLetters[randomColor]
     local shape = {
@@ -165,7 +168,7 @@ local function randomizeShape()
     }
     for i=1, 4 do
         for j=1, 4 do
-            if shapes[randomShape][1][i][j] ~= ' ' then
+            if shapes[shapeIndex][shapeRotation][i][j] ~= ' ' then
                 shape[i][j]=randomColorLetter
             end
         end
@@ -195,8 +198,47 @@ function love.draw()
         for x=1,4 do
         local rect = randomizedShape[x][y]
         if rect ~= ' ' then
-            drawRectangle(rect,x,y)
+            drawRectangle(rect,x  + horizontalOffset ,y + verticalOffset)
             end
         end
+    end
+end
+
+function love.keypressed(key)
+    if key == 'up' then
+        shapeRotation = shapeRotation + 1
+        if shapeRotation > #shapes[shapeIndex] then
+            shapeRotation = 1
+        end
+
+    elseif key =='down' then
+        shapeRotation = shapeRotation - 1 
+        if shapeRotation < 1 then
+            shapeRotation = #shapes[shapeIndex]
+        end
+    elseif key == 'n' then
+        shapeIndex = shapeIndex + 1
+        if shapeIndex >#shapes then
+            shapeIndex=1
+        end
+        shapeRotation=1
+    elseif key=='m' then
+        shapeIndex = shapeIndex - 1
+        if shapeIndex < 1 then
+            shapeIndex = #shapes
+        shapeRotation = 1
+        end
+    elseif key=='right' then
+        horizontalOffset = horizontalOffset + 1
+    elseif key=='left' then
+        horizontalOffset = horizontalOffset -1
+    end
+end
+
+function love.update(dt)
+    fallingTime = fallingTime + dt
+    if fallingTime >=0.5 then
+        fallingTime = 0
+        verticalOffset = verticalOffset + 1
     end
 end
